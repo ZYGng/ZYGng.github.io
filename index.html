@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f2ef;
+    }
+
+    .logo {
+      text-align: center;
+      padding: 6% 0;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    ul,
+    li {
+      margin: 0;
+      padding: 0;
+    }
+
+    h3,
+    h2 {
+      padding: 0;
+      margin: 0;
+    }
+
+    .item {
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .item-part.show .item {
+      display: block;
+    }
+
+    .item li {
+      margin: 0 10px 10px 0;
+      list-style: none;
+      display: inline-block;
+      vertical-align: top;
+      color: #fff;
+    }
+
+    .item .block {
+      padding: 4px 10px;
+      background-color: #ff5e20;
+      border-radius: 4px;
+      height: 200px;
+      width: 200px;
+      word-break: break-all;
+      display: inline-block;
+      color: inherit;
+      text-decoration: none;
+      line-height: 1.2;
+      word-break: normal;
+    }
+
+    .item .block.focus {
+      background-color: #006300;
+    }
+
+    .item-part {
+      background-color: #eee;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    .item h3 {
+      padding: 0 0 4px 2px;
+    }
+
+    #log {
+      background-color: #f1f2ef;
+      color: #f00;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="log"></div>
+  <script>
+    log(typeof jssdk)
+    function log(str) {
+      let $div = document.getElementById('log')
+      let curDiv = document.createElement('div')
+      curDiv.innerText = str
+      $div.appendChild(curDiv)
+    }
+    window.alert = log
+  </script>
+  <div class="logo">
+    <h2>Video Test Tool</h2>
+  </div>
+  <div class="list">
+    <div class="item-part">
+      <div class="item">
+        <h3>Choose link</h3>
+        <ul>
+          <li onclick="action('https://ytlr-cert.appspot.com/latest/main.html?&test_type=encryptedmedia-test#1644563899890')">
+            <a tabindex="1" href="javascript:void(0)" class="block">windvine test</a>
+          </li>
+          <li onclick="action('https://reference.dashif.org/dash.js/nightly/samples/drm/playready.html')">
+            <a tabindex="1" href="javascript:void(0)" class="block">playready test</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <script>
+    const { app, device } = window.jssdk || {}
+    function action(str) {
+      //根据name对对应的方法传递对应的参数
+      if (str.match(/^http/)) {
+        location.href = str;
+      }
+    }
+    function setNext(code) {
+      //处理遥控上下左右
+      let current = document.querySelector('[tabindex].focus')
+      let next = null
+      if (current) {
+        let removeDom = null
+        let col = current._col
+        let row = current._row
+        if (code === 13) {
+          let $li = current.parentElement
+          let event = new Event('click')
+          $li.dispatchEvent(event)
+        }
+        if (code === 37) {
+          //left
+          if (col > 0) {
+            removeDom = current
+            next = arrBlocks[row][col - 1]
+          }
+        } else if (code === 38) {
+          //top
+          if (row > 0 && arrBlocks[row - 1].length - 1 >= col) {
+            removeDom = current
+            next = arrBlocks[row - 1][col]
+          }
+          if (row > 0 && arrBlocks[row - 1].length - 1 < col) {
+            removeDom = current
+            next = arrBlocks[row - 1][arrBlocks[row - 1].length - 1]
+          } else if (row === 0) {
+            scrollPageTo(0)
+          }
+        } else if (code === 39) {
+          //right
+          if (col < arrBlocks[row].length - 1) {
+            removeDom = current
+            next = arrBlocks[row][col + 1]
+          }
+        } else if (code === 40) {
+          //bottom
+          if (row < arrBlocks.length - 1 && arrBlocks[row + 1].length - 1 > col) {
+            removeDom = current
+            next = arrBlocks[row + 1][col]
+          } else if (row < arrBlocks.length - 1 && arrBlocks[row + 1].length - 1 <= col) {
+            removeDom = current
+            next = arrBlocks[row + 1][arrBlocks[row + 1].length - 1]
+          } else if (row === arrBlocks.length) {
+            scrollPageTo(window.innerHeight)
+          }
+        }
+        removeDom && removeDom.classList.remove('focus')
+        if (next) {
+          next.classList.add('focus')
+          scrollPageTo(next._top - 10)
+        }
+      } else {
+        arrBlocks[0][0].classList.add('focus')
+      }
+    }
+  </script>
+  <script>
+    let objBlocks = {}
+    let arrBlocks = []
+    //处理数据成二维数组
+    document.querySelectorAll('[tabindex]').forEach($dom => {
+      let top = $dom.getBoundingClientRect().top
+      $dom._top = top
+      if (!objBlocks[top]) {
+        objBlocks[top] = []
+      }
+      $dom._col = objBlocks[top].length
+      objBlocks[top].push($dom)
+    })
+    for (let key in objBlocks) {
+      objBlocks[key].forEach($dom => {
+        $dom._row = arrBlocks.length
+      })
+      arrBlocks.push(objBlocks[key])
+    }
+    document.addEventListener('keydown', e => {
+      if ([40, 38, 37, 39, 13].indexOf(e.keyCode) !== -1) {
+        e.preventDefault()
+        setNext(e.keyCode)
+      }
+      if (e.keyCode === 166) {
+        // backpress
+        if (location.href.match(/index\.html$/)) {
+          // if the page is first page. App exit
+          app.exit()
+        } else {
+          // if the page is not first page, history
+          history.back()
+        }
+      }
+    })
+  </script>
+</body>
+</html>
