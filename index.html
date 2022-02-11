@@ -155,8 +155,6 @@
           if (row > 0 && arrBlocks[row - 1].length - 1 < col) {
             removeDom = current
             next = arrBlocks[row - 1][arrBlocks[row - 1].length - 1]
-          } else if (row === 0) {
-            scrollPageTo(0)
           }
         } else if (code === 39) {
           //right
@@ -172,14 +170,11 @@
           } else if (row < arrBlocks.length - 1 && arrBlocks[row + 1].length - 1 <= col) {
             removeDom = current
             next = arrBlocks[row + 1][arrBlocks[row + 1].length - 1]
-          } else if (row === arrBlocks.length) {
-            scrollPageTo(window.innerHeight)
           }
         }
         removeDom && removeDom.classList.remove('focus')
         if (next) {
           next.classList.add('focus')
-          scrollPageTo(next._top - 10)
         }
       } else {
         arrBlocks[0][0].classList.add('focus')
