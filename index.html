@@ -124,7 +124,7 @@
     function action(str) {
       //根据name对对应的方法传递对应的参数
       if (str.match(/^http/)) {
-        location.href = str;
+        location.assign(str);
       }
     }
     function setNext(code) {
