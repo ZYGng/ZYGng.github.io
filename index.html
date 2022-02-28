@@ -79,28 +79,22 @@
       padding: 0 0 4px 2px;
     }
 
-    #log {
-      background-color: #f1f2ef;
-      color: #f00;
-      position: fixed;
+    .loading_block {
+      position: absolute;
       top: 0;
       left: 0;
+      width: 100vw;
+      height: 100vh;
+      opacity: 0.7;
+      padding-top: 40vh;
+      text-align: center;
+      font-size: 24px;
+      background-color: #ccc;
     }
   </style>
 </head>
 
 <body>
-  <div id="log"></div>
-  <script>
-    // log(typeof jssdk)
-    function log(str) {
-      let $div = document.getElementById('log')
-      let curDiv = document.createElement('div')
-      curDiv.innerText = str
-      $div.appendChild(curDiv)
-    }
-    window.alert = log
-  </script>
   <div class="logo">
     <h2>Video Test Tool</h2>
   </div>
@@ -119,13 +113,20 @@
       </div>
     </div>
   </div>
+  <div class="loading_block" style="display: none;">
+    Web page loading, please wait......
+  </div>
+  <!-- dom事件处理函数 -->
   <script>
     const { app, device } = window.jssdk || {}
+    let loading = document.querySelector(".loading_block");
     function action(str) {
+      loading.style.display = "block";
       //根据name对对应的方法传递对应的参数
-      if (str.match(/^http/)) {
+      let timer = setTimeout(() => {
         location.assign(str);
-      }
+        clearTimeout(timer);
+      }, 100)
     }
     function setNext(code) {
       //处理遥控上下左右
@@ -180,7 +181,12 @@
         arrBlocks[0][0].classList.add('focus')
       }
     }
+    
+    window.addEventListener('pageshow', () => {
+      loading.style.display = "none";
+    })
   </script>
+  <!-- 按钮功能初始化 -->
   <script>
     let objBlocks = {}
     let arrBlocks = []
